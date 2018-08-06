@@ -1,25 +1,25 @@
 // "Create" stub created by 'zapier convert'. This is just a stub - you will need to edit!
 const { replaceVars } = require('../utils');
 
-const makeRequest = (z, bundle) => {
-  const scripting = require('../scripting');
-  const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
+const makeRequest = (z, bundle) => { }
+const scripting = require('../scripting');
+const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
 
-  bundle._legacyUrl = ' {{url}}:{{port}}/REST/';
-  bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
+bundle._legacyUrl = ' {{url}}:{{port}}/REST/';
+bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
 
-  // Do a _pre_write() from scripting.
-  const preWriteEvent = {
-    name: 'create.pre',
-    key: 'create_name'
-  };
-  return legacyScriptingRunner
-    .runEvent(preWriteEvent, z, bundle)
-    .then(preWriteResult => z.request(preWriteResult))
-    .then(response => {
-      response.throwForStatus();
-      return z.JSON.parse(response.content);
-    });
+// Do a _pre_write() from scripting.
+const preWriteEvent = {
+  name: 'create.pre',
+  key: 'create_name'
+};
+return legacyScriptingRunner
+  .runEvent(preWriteEvent, z, bundle)
+  .then(preWriteResult => z.request(preWriteResult))
+  .then(response => {
+    response.throwForStatus();
+    return z.JSON.parse(response.content);
+  });
 };
 
 module.exports = {

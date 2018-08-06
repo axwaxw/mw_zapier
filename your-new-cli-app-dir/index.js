@@ -1,12 +1,12 @@
 // Created by 'zapier convert'. This is just a stub - you will need to edit!
 
 const authentication = require('./authentication');
-const AccountTrigger = require('./triggers/account');
-const DocumentTrigger = require('./triggers/document');
-const NewnameTrigger = require('./triggers/new_name');
+const AccountTrigger = require('./triggers/account_converted');
+const DocumentTrigger = require('./triggers/document_converted');
+const NewnameTrigger = require('./triggers/new_name_converted');
 const NewtransactionTrigger = require('./triggers/new_transaction');
 const TaxTrigger = require('./triggers/tax');
-const FindnameSearch = require('./searches/find_name');
+const FindnameSearch = require('./searches/find_name_converted');
 const CreatenameCreate = require('./creates/create_name');
 const CreatetransactionCreate = require('./creates/create_transaction');
 

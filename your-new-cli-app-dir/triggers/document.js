@@ -12,9 +12,6 @@ const getList = (z, bundle) => {
 
       var documents = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
 
-      id: index,
-        document: $(element).text()
-
       var documents_array = documents.map(document, index => (
         {
           id: index,
@@ -27,10 +24,6 @@ const getList = (z, bundle) => {
 
     });
 };
-
-
-
-
 
 
 

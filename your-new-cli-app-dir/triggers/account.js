@@ -12,27 +12,27 @@ const getList = (z, bundle) => {
     format: "xml-verbose"
   }
 
-  const responsePromise = z.request({
+  const responsePromise = z.request({}
     url: url,
     params: params
   });
-  return responsePromise
-    .then(response => {
+return responsePromise
+  .then(response => {
 
-      var accounts = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
+    var accounts = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
 
-      var accounts_array = accounts.map(account => (
-        {
-          id: account.sequencenumber,
-          name_code: account.code,
-          description: account.description
-        }
-      ));
+    var accounts_array = accounts.map(account => (
+      {
+        id: account.sequencenumber,
+        name_code: account.code,
+        description: account.description
+      }
+    ));
 
-      console.log(accounts_array);
-      return z.JSON.parse(accounts_array);
+    console.log(accounts_array);
+    return z.JSON.parse(accounts_array);
 
-    });
+  });
 };
 
 
