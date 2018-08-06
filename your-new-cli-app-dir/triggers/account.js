@@ -1,33 +1,40 @@
-// Trigger stub created by 'zapier convert'. This is just a stub - you will need to edit!
-const { replaceVars } = require('../utils');
-
 const getList = (z, bundle) => {
-  const scripting = require('../scripting');
-  const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
 
-  bundle._legacyUrl = '{{url}}:{{port}}/REST/';
-  bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
+  var XML = require('pixl-xml');
+  var url = bundle.authData.url;
+  var document = bundle.authData.document;
 
-  // Do a _pre_poll() from scripting.
-  const prePollEvent = {
-    name: 'trigger.pre',
-    key: 'account'
-  };
-  return legacyScriptingRunner
-    .runEvent(prePollEvent, z, bundle)
-    .then(prePollResult => z.request(prePollResult))
+  url += encodeURIComponent(document);
+  url += "/export/";
+
+  var params = {
+    table: "account",
+    format: "xml-verbose"
+  }
+
+  const responsePromise = z.request({
+    url: url,
+    params: params
+  });
+  return responsePromise
     .then(response => {
-      response.throwForStatus();
 
-      // Do a _post_poll() from scripting.
-      const postPollEvent = {
-        name: 'trigger.post',
-        key: 'account',
-        response
-      };
-      return legacyScriptingRunner.runEvent(postPollEvent, z, bundle);
+      var accounts = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
+
+      var accounts_array = accounts.map(account => (
+        {
+          id: account.sequencenumber,
+          name_code: account.code,
+          description: account.description
+        }
+      ));
+
+      console.log(accounts_array);
+      return z.JSON.parse(accounts_array);
+
     });
 };
+
 
 module.exports = {
   key: 'account',
