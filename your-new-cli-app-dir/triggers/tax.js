@@ -1,31 +1,39 @@
-// Trigger stub created by 'zapier convert'. This is just a stub - you will need to edit!
-const { replaceVars } = require('../utils');
-
 const getList = (z, bundle) => {
-  const scripting = require('../scripting');
-  const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
 
-  bundle._legacyUrl = '{{url}}:{{port}}/REST/';
-  bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
+  var XML = require('pixl-xml');
+  var url = bundle.authData.url;
+  var document = bundle.inputData.document;
 
-  // Do a _pre_poll() from scripting.
-  const prePollEvent = {
-    name: 'trigger.pre',
-    key: 'tax'
-  };
-  return legacyScriptingRunner
-    .runEvent(prePollEvent, z, bundle)
-    .then(prePollResult => z.request(prePollResult))
+  url += encodeURIComponent(document);
+  url += "/export/";
+
+  var params = {
+    table: "tax-rate",
+    format: "xml-verbose"
+  }
+
+  const responsePromise = z.request({
+    url: url,
+    params: params
+  })
+
+  return responsePromise
     .then(response => {
-      response.throwForStatus();
 
-      // Do a _post_poll() from scripting.
-      const postPollEvent = {
-        name: 'trigger.post',
-        key: 'tax',
-        response
-      };
-      return legacyScriptingRunner.runEvent(postPollEvent, z, bundle);
+      var tax_rates = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
+
+      var tax_array = tax_rates.map(tax_rate => (
+        {
+          id: tax_rate.sequencenumber,
+          tax_code: tax_rate.code,
+          rate_name: tax_rate.ratename + " (" + Number(tax_rate.rate2).toFixed(2) + "%)",
+          rate: tax_rate.rate2
+        }
+      ));
+
+      console.log(tax_array);
+      return z.JSON.parse(tax_array);
+
     });
 };
 
@@ -35,7 +43,7 @@ module.exports = {
 
   display: {
     label: 'Tax',
-    description: 'Tax Rates',
+    description: 'Tax Rates Lookup',
     hidden: true,
     important: false
   },
@@ -44,6 +52,11 @@ module.exports = {
     inputFields: [],
     outputFields: [],
     perform: getList,
-    sample: null
+    sample: {
+      id: 1234,
+      tax_code: "G",
+      rate_name: "GST (15%)",
+      rate: 15
+    }
   }
 };

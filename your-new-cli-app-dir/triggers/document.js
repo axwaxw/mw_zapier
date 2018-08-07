@@ -25,9 +25,6 @@ const getList = (z, bundle) => {
     });
 };
 
-
-
-
 module.exports = {
   key: 'document',
   noun: 'document',
@@ -43,6 +40,9 @@ module.exports = {
     inputFields: [],
     outputFields: [],
     perform: getList,
-    sample: null
+    sample: {
+      id: 1234,
+      document: "Acme Widgets.moneyworks"
+    }
   }
 };

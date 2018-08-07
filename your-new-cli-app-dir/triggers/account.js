@@ -12,29 +12,29 @@ const getList = (z, bundle) => {
     format: "xml-verbose"
   }
 
-  const responsePromise = z.request({}
+  const responsePromise = z.request({
     url: url,
     params: params
-  });
-return responsePromise
-  .then(response => {
+  })
 
-    var accounts = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
+  return responsePromise
+    .then(response => {
 
-    var accounts_array = accounts.map(account => (
-      {
-        id: account.sequencenumber,
-        name_code: account.code,
-        description: account.description
-      }
-    ));
+      var accounts = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
 
-    console.log(accounts_array);
-    return z.JSON.parse(accounts_array);
+      var accounts_array = accounts.map(account => (
+        {
+          id: account.sequencenumber,
+          code: account.code,
+          description: account.description
+        }
+      ));
 
-  });
+      console.log(accounts_array);
+      return z.JSON.parse(accounts_array);
+
+    });
 };
-
 
 module.exports = {
   key: 'account',
@@ -42,7 +42,7 @@ module.exports = {
 
   display: {
     label: 'Account',
-    description: 'Accounts',
+    description: 'Accounts Trigger',
     hidden: true,
     important: false
   },
@@ -51,6 +51,10 @@ module.exports = {
     inputFields: [],
     outputFields: [],
     perform: getList,
-    sample: null
+    sample: {
+      id: 1234,
+      name_code: "200",
+      description: "Sales"
+    }
   }
 };

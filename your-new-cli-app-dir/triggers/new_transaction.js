@@ -1,33 +1,50 @@
-// Trigger stub created by 'zapier convert'. This is just a stub - you will need to edit!
-const { replaceVars } = require('../utils');
-
 const getList = (z, bundle) => {
-  const scripting = require('../scripting');
-  const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
 
-  bundle._legacyUrl = '{{url}}:{{port}}/REST/';
-  bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
+  var XML = require('pixl-xml');
+  var url = bundle.authData.url;
+  var document = bundle.authData.document;
 
-  // Do a _pre_poll() from scripting.
-  const prePollEvent = {
-    name: 'trigger.pre',
-    key: 'new_transaction'
-  };
-  return legacyScriptingRunner
-    .runEvent(prePollEvent, z, bundle)
-    .then(prePollResult => z.request(prePollResult))
+  url += encodeURIComponent(document);
+  url += "/export/";
+
+  var params = {
+    table: "transaction",
+    search: "transdate>today()-10",
+    limit: 50,
+    sort: "transdate",
+    direction: "descending",
+    format: "xml-verbose"
+  }
+
+  const responsePromise = z.request({
+    url: url,
+    params: params
+  })
+
+  return responsePromise
     .then(response => {
-      response.throwForStatus();
+      var transactions = XML.parse(response.content, { preserveAttributes: true, preserveDocumentNode: true });
+      console.log(trasactions.table.transaction);
 
-      // Do a _post_poll() from scripting.
-      const postPollEvent = {
-        name: 'trigger.post',
-        key: 'new_transaction',
-        response
-      };
-      return legacyScriptingRunner.runEvent(postPollEvent, z, bundle);
+      var transactions_array = doc.table.transaction
+
+      console.log(JSON.stringify(transactions_array))
+
+      transactions_array.forEach(transaction => {
+
+        var details = transaction.subfile.detail
+        delete transaction.subfile
+
+        if (Array.isArray(details)) {
+          transaction.details = details
+        } else {
+          transaction.details = []
+          transaction.details.push(details)
+        }
+        return z.JSON.parse(transactions_array);
+      });
     });
-};
+}
 
 module.exports = {
   key: 'new_transaction',

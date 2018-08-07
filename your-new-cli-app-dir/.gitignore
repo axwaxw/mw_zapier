@@ -63,3 +63,6 @@ typings/
 
 # converted files
 *_converted.js
+
+# VSCode
+.vscode

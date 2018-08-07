@@ -1,25 +1,115 @@
-// "Create" stub created by 'zapier convert'. This is just a stub - you will need to edit!
-const { replaceVars } = require('../utils');
+const createTransaction = (z, bundle) => {
 
-const makeRequest = (z, bundle) => {
-  const scripting = require('../scripting');
-  const legacyScriptingRunner = require('zapier-platform-legacy-scripting-runner')(scripting);
+  var url = bundle.authData.url;
+  var document = bundle.action_fields.document;
 
-  bundle._legacyUrl = '{{url}}:{{port}}/REST/';
-  bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
+  url += encodeURIComponent(document);
+  url += "/import";
 
-  // Do a _pre_write() from scripting.
-  const preWriteEvent = {
-    name: 'create.pre',
-    key: 'create_transaction'
-  };
-  return legacyScriptingRunner
-    .runEvent(preWriteEvent, z, bundle)
-    .then(preWriteResult => z.request(preWriteResult))
-    .then(response => {
-      response.throwForStatus();
-      return z.JSON.parse(response.content);
-    });
+  var transaction_xml = "";
+  var detail_xml = "";
+  var detail_subfile = "";
+  var fields = bundle.inputFields;
+  var detail_lines = fields.detail;
+  var d;
+
+  //  ASSEMBLE DETAIL LINES
+
+  for (d = 0; d < detail_lines.length; d++) {
+    var details = detail_lines[d];
+
+    detail_xml = '';
+    detail_xml += '<detail>';
+    detail_xml += details.detail_stockcode && '<detail.StockCode>' + details.detail_stockcode + '</detail.StockCode>' || '';
+    detail_xml += details.detail_stockqty && '<detail.StockQty>' + details.detail_stockqty + '</detail.StockQty>' || '';
+    detail_xml += details.detail_orderqty && '<detail.OrderQty>' + details.detail_orderqty + '</detail.OrderQty>' || '';
+
+    detail_xml += details.description && '<detail.Description>' + details.description + '</detail.Description>' || '<detail.description work-it-out="true" />';
+    detail_xml += details.unit_price && '<detail.UnitPrice>' + details.unit_price + '</detail.UnitPrice>' || '<detail.unitprice work-it-out="true" />';
+    detail_xml += details.net && '<detail.Net>' + details.net + '</detail.Net>' || '<detail.net work-it-out="true" />';
+    detail_xml += details.tax_code && '<detail.TaxCode>' + details.tax_code + '</detail.TaxCode>' || '<detail.taxcode work-it-out="true" />';
+    detail_xml += details.tax && '<detail.Tax>' + details.tax + '</detail.Tax>' || '<detail.tax work-it-out="true" />';
+    detail_xml += details.gross && '<detail.Gross>' + details.gross + '</detail.Gross>' || '<detail.gross work-it-out="true" />';
+    detail_xml += details.discount && '<detail.Discount>' + details.discount + '</detail.Discount>' || '<detail.discount work-it-out="true" />';
+    detail_xml += details.account && '<detail.Account>' + details.account + '</detail.Account>' || '<detail.Account work-it-out="true" />';
+
+    detail_xml += details.sale_unit && '<detail.SaleUnit>' + details.sale_unit + '</detail.SaleUnit>' || '<detail.Account work-it-out="true" />';
+    detail_xml += details.cost_price && '<detail.CostPrice>' + details.cost_price + '</detail.CostPrice>' || '<detail.Account work-it-out="true" />';
+    detail_xml += details.job_code && '<detail.JobCode>' + details.job_code + '</detail.JobCode>' || '';
+    detail_xml += details.job_code && '<detail.UserText>' + details.user_text + '</detail.UserText>' || '';
+
+    detail_xml += '</detail>';
+
+    detail_subfile += detail_xml;
+  }
+
+  console.log(detail_subfile);
+
+  transaction_xml = '';
+  transaction_xml += '<?xml version="1.0"?>';
+  transaction_xml += '<table name="Transaction">';
+  transaction_xml += '<transaction>';
+
+  transaction_xml += '<TransDate work-it-out="true" />';
+  transaction_xml += '<Type>' + fields.type + '</Type>';
+  transaction_xml += '<NameCode>' + fields.name_code + '</NameCode>';
+
+  transaction_xml += '<OurRef work-it-out="true" />';
+  transaction_xml += '<Contra work-it-out="true" />';
+
+  transaction_xml += fields.to_from && '<ToFrom>' + fields.to_from + '</ToFrom>' || '<ToFrom work-it-out="true" />';
+  transaction_xml += fields.their_ref && '<TheirRef>' + fields.their_ref + '</TheirRef>' || '<TheirRef work-it-out="true" />';
+  transaction_xml += fields.description && '<Description>' + fields.description + '</Description>' || '<Description work-it-out="true" />';
+
+  transaction_xml += fields.mailing_address && '<MailingAddress>' + fields.mailing_address + '</MailingAddress>' || '';
+  transaction_xml += fields.delivery_address && '<DeliveryAddress>' + fields.delivery_address + '</DeliveryAddress>' || '';
+  transaction_xml += fields.freight_code && '<FreightCode>' + fields.freight_code + '</FreightCode>' || '';
+  transaction_xml += fields.freight_amount && '<FreightAmount>' + fields.freight_amount + '</FreightAmount>' || '';
+
+  transaction_xml += fields.currency && '<Currency>' + fields.currency + '</Currency>' || '';
+  transaction_xml += fields.exchange_rate && '<ExchangeRate>' + fields.exchange_rate + '</ExchangeRate>' || '';
+
+  transaction_xml += fields.prod_price_code && '<ProdPriceCode>' + fields.prod_price_code + '</ProdPriceCode>' || '<ProdPriceCode work-it-out="true" />';
+
+  transaction_xml += fields.payment_method && '<PaymentMethod>' + fields.payment_method + '</PaymentMethod>' || '';
+
+  transaction_xml += fields.prompt_payment_date && '<PromptPaymentDate>' + fields.prompt_payment_date + '</PromptPaymentDate>' || '<PromptPaymentDate work-it-out="true" />';
+  transaction_xml += fields.prompt_payment_amt && '<PromptPaymentAmt>' + fields.prompt_payment_amt + '</PromptPaymentAmt>' || '<PromptPaymentAmt work-it-out="true" />';
+
+  transaction_xml += fields.special_bank && '<SpecialBank>' + fields.special_bank + '</SpecialBank>' || '';
+  transaction_xml += fields.special_branch && '<SpecialBranch>' + fields.special_branch + '</SpecialBranch>' || '';
+  transaction_xml += fields.special_account && '<SpecialAccount>' + fields.special_account + '</SpecialAccount>' || '';
+
+  transaction_xml += fields.flag && '<Flag>' + fields.flag + '</Flag>' || '';
+  transaction_xml += fields.analysis && '<Analysis>' + fields.analysis + '</Analysis>' || '';
+
+  transaction_xml += fields.colour && '<Colour>' + fields.colour + '</Colour>' || '';
+  transaction_xml += fields.user1 && '<User1>' + fields.user_1 + '</User1>' || '';
+  transaction_xml += fields.user2 && '<User2>' + fields.user_2 + '</User2>' || '';
+  transaction_xml += fields.user3 && '<User3>' + fields.user_3 + '</User3>' || '';
+
+  transaction_xml += '<subfile name="Detail">';
+  transaction_xml += detail_subfile;
+  transaction_xml += '</subfile>';
+
+  transaction_xml += fields.gross && '<Gross>' + fields.gross + '</Gross>' || '<Gross work-it-out="true" />';
+
+  transaction_xml += '</transaction>';
+  transaction_xml += '</table>';
+
+  transaction_xml = transaction_xml.replace("&", "_");
+  transaction_xml = transaction_xml.replace("%", "_");
+
+  console.log(transaction_xml);
+
+  const responsePromise = z.request({
+    method: 'POST',
+    url: url,
+    body: transaction_xml
+  });
+
+  return responsePromise
+  //  .then(response => z.JSON.parse(response.content));
 };
 
 module.exports = {
@@ -177,7 +267,7 @@ module.exports = {
         required: false
       },
       {
-        key: 'freightdetails',
+        key: 'freight_details',
         label: 'Freight Details',
         helpText: 'Details of freight for order',
         type: 'string',
@@ -223,7 +313,7 @@ module.exports = {
         choices: { A: 'A', B: 'B', C: 'C', D: 'D', E: 'E', F: 'F', G: 'G', H: 'H' }
       },
       {
-        key: 'salesperson',
+        key: 'sales_person',
         label: 'Salesperson',
         helpText:
           'The salesperson for the transaction. If the transaction involves any products with the “Append Salesperson” attribute set, the value of this field will be appended to that products sales and/or cost of goods account code.',
@@ -272,21 +362,21 @@ module.exports = {
         }
       },
       {
-        key: 'user1',
+        key: 'user_1',
         label: 'User 1',
         helpText: 'User defined',
         type: 'string',
         required: false
       },
       {
-        key: 'user2',
+        key: 'user_2',
         label: 'User 2',
         helpText: 'User defined',
         type: 'string',
         required: false
       },
       {
-        key: 'user3',
+        key: 'user_3',
         label: 'User 3',
         helpText: 'User defined',
         type: 'string',
@@ -294,7 +384,35 @@ module.exports = {
       }
     ],
     outputFields: [],
-    perform: makeRequest,
-    sample: null
+    perform: createTransaction,
+    sample: {
+      ourref: "1235",
+      transdate: "20180807",
+      duedate: "20180807",
+      type: "SOI",
+      theirref: "their_ref",
+      namecode: "ACME",
+      description: "Widget Sale",
+      gross: "293.25",
+      tofrom: "Acme Limited",
+      colour: "6",
+      prodpricecode: "B",
+      deliveryaddress: "",
+      freightcode: "CP",
+      details: [{
+        account: "1110-",
+        taxcode: "G",
+        gross: "115",
+        tax: "15",
+        net: "100",
+        description: "Widget",
+        stockqty: "1.000000",
+        stockcode: "WIDG",
+        costprice: "50",
+        unitprice: "100",
+        saleunit: "ea",
+        orderqty: "1.00"
+      }]
+    }
   }
 };

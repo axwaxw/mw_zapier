@@ -1,62 +1,71 @@
 var XML = require('pixl-xml');
 
 var xml_string = `<?xml version="1.0"?>
-<table name="Transaction" count="1" start="0" found="1">
+<table name="Transaction" count="2" start="0" found="2">
 	<transaction>
-		<ourref>2121</ourref>
-		<transdate>20151225</transdate>
-		<duedate>20160120</duedate>
-		<type>DII</type>
-		<theirref>3433</theirref>
-		<namecode>WHITE</namecode>
-		<description>Widget Sales</description>
-		<gross>1009.12</gross>
-		<contra>1500</contra>
-		<tofrom>White Contractors</tofrom>
-		<prodpricecode>A</prodpricecode>
+		<ourref>32099</ourref>
+		<transdate>20180807</transdate>
+		<duedate>20180807</duedate>
+		<type>SOI</type>
+		<theirref>COAZ00000249003</theirref>
+		<namecode>LOYNZ.ANZ</namecode>
+		<description>Melissa Broadbent (6014352002347645)</description>
+		<gross>293.25</gross>
+		<tofrom>Loyalty New Zealand Ltd (Air NZ)</tofrom>
+		<colour>6</colour>
+		<prodpricecode>B</prodpricecode>
+		<deliveryaddress>Melissa Broadbent&#13;79 Henwood Road&#13;&#13;Taupaki&#13;&#13;0782&#13;New Zealand&#13;+6421459206</deliveryaddress>
+		<freightcode>CP</freightcode>
 		<subfile name="Detail">
 			<detail>
-				<detail.account>4000-</detail.account>
+				<detail.account>1110-</detail.account>
 				<detail.taxcode>G</detail.taxcode>
-				<detail.gross>779.62</detail.gross>
-				<detail.tax>101.69</detail.tax>
-				<detail.net>677.93</detail.net>
-				<detail.description>Chrome Taper Widget Extra-large</detail.description>
-				<detail.stockqty>7.000000</detail.stockqty>
-				<detail.stockcode>CB200</detail.stockcode>
-				<detail.costprice>34.239167</detail.costprice>
-				<detail.unitprice>99.000000</detail.unitprice>
+				<detail.gross>293.25</detail.gross>
+				<detail.tax>38.25</detail.tax>
+				<detail.net>255.00</detail.net>
+				<detail.description>Ottoman Charcoal Tweed</detail.description>
+				<detail.stockqty>1.000000</detail.stockqty>
+				<detail.stockcode>OTMCT</detail.stockcode>
+				<detail.costprice>114.337222</detail.costprice>
+				<detail.unitprice>254.999988</detail.unitprice>
 				<detail.saleunit>ea</detail.saleunit>
-			</detail>
-			<detail>
-				<detail.account>4000-</detail.account>
-				<detail.taxcode>G</detail.taxcode>
-				<detail.gross>193.50</detail.gross>
-				<detail.tax>25.24</detail.tax>
-				<detail.net>168.26</detail.net>
-				<detail.description>Bronze Taper Widget Medium</detail.description>
-				<detail.stockqty>8.000000</detail.stockqty>
-				<detail.stockcode>BC200</detail.stockcode>
-				<detail.costprice>7.825875</detail.costprice>
-				<detail.unitprice>21.500000</detail.unitprice>
-				<detail.saleunit>ea</detail.saleunit>
-			</detail>
-			<detail>
-				<detail.account>4000-</detail.account>
-				<detail.taxcode>G</detail.taxcode>
-				<detail.gross>36.00</detail.gross>
-				<detail.tax>4.70</detail.tax>
-				<detail.net>31.30</detail.net>
-				<detail.description>Chrome Widget Medium</detail.description>
-				<detail.stockqty>2.000000</detail.stockqty>
-				<detail.stockcode>CA200</detail.stockcode>
-				<detail.costprice>6.848462</detail.costprice>
-				<detail.unitprice>16.000000</detail.unitprice>
-				<detail.saleunit>ea</detail.saleunit>
+				<detail.orderqty>1.000000</detail.orderqty>
 			</detail>
 		</subfile>
 	</transaction>
-</table>`
+	<transaction>
+		<ourref>32098</ourref>
+		<transdate>20180807</transdate>
+		<duedate>20180807</duedate>
+		<type>SOI</type>
+		<theirref>COAZ00000248997</theirref>
+		<namecode>LOYNZ.ANZ</namecode>
+		<description>Melissa Broadbent (6014352002347645)</description>
+		<gross>482.31</gross>
+		<tofrom>Loyalty New Zealand Ltd (Air NZ)</tofrom>
+		<colour>6</colour>
+		<prodpricecode>B</prodpricecode>
+		<deliveryaddress>Melissa Broadbent&#13;79 Henwood Road&#13;&#13;Taupaki&#13;&#13;0782&#13;New Zealand&#13;+6421459206</deliveryaddress>
+		<freightcode>CP</freightcode>
+		<subfile name="Detail">
+			<detail>
+				<detail.account>1110-</detail.account>
+				<detail.taxcode>G</detail.taxcode>
+				<detail.gross>482.31</detail.gross>
+				<detail.tax>62.91</detail.tax>
+				<detail.net>419.40</detail.net>
+				<detail.description>Marine Bean Chair Charcoal Tweed</detail.description>
+				<detail.stockqty>1.000000</detail.stockqty>
+				<detail.stockcode>MBNCHAIRCT</detail.stockcode>
+				<detail.costprice>195.450476</detail.costprice>
+				<detail.unitprice>419.400009</detail.unitprice>
+				<detail.saleunit>ea</detail.saleunit>
+				<detail.orderqty>1.000000</detail.orderqty>
+			</detail>
+		</subfile>
+	</transaction>
+</table>
+`
 
 xml_string = xml_string.replace(/detail[.]/g, "")
 
@@ -64,8 +73,29 @@ console.log(xml_string)
 
 var doc = XML.parse(xml_string, { preserveAttributes: true, preserveDocumentNode: true });
 
-var details = doc.table.transaction.subfile.detail
-delete doc.table.transaction.subfile
-doc.table.transaction.details = details
 
-console.log(JSON.stringify(doc.table.transaction))
+
+var trans = doc.table.transaction
+
+console.log(JSON.stringify(trans))
+
+trans.forEach(transaction => {
+
+  var details = transaction.subfile.detail
+  delete transaction.subfile
+  transaction.details = []
+  transaction.details.push(details)
+
+}
+
+
+
+);
+
+console.log(JSON.stringify(trans))
+
+
+//var details = doc.table.transaction.subfile.detail
+//delete doc.table.transaction.subfile
+//doc.table.transaction.details = details
+

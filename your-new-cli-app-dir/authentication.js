@@ -1,10 +1,9 @@
-const authentication = {
+module.exports = {
   type: 'custom',
   test: {
     url:
       'http://{{bundle.authData.url}}:{{bundle.authData.port}}/REST//list'
   },
-
   fields: [
     {
       key: 'connection_type',
@@ -53,45 +52,10 @@ const authentication = {
       type: 'string',
       required: true,
       helpText: 'Found in your browsers address bar after logging in.'
-    },
-    {
-      key: 'api_key',
-      type: 'string',
-      required: true,
-      helpText: 'Found on your settings page.'
     }
-  ]
-};
+  ],
 
-const add_headers = (request, z, bundle) => {
-
-  var custom_headers = {};
-
-  var datacentre_username = bundle.authData.datacentre_username;
-  var datacentre_password = bundle.authData.datacentre_password;
-  var document_username = bundle.authData.document_username;
-  var document_password = bundle.authData.document_password;
-
-  var auth_header = "";
-
-  if (datacentre_username || datacentre_password) {
-    auth_header = "Basic " + btoa(datacentre_username + ":Datacentre:" + datacentre_password) + ", Basic " + btoa(document_username + ":Document:" + document_password);
-  } else {
-    auth_header = "Basic " + btoa(document_username + ":Document:" + document_password);
+  connectionLabel: (z, bundle) => {
+    return bundle.inputData.document;
   }
-
-  console.log(auth_header);
-
-  custom_headers['Content-Type'] = "application/xml; charset=utf-8";
-  custom_headers['Accept'] = "application/xml";
-  custom_headers['Authorization'] = auth_header;
-
-  console.log(custom_headers);
-
-  return custom_headers;
-}
-
-const App = {
-  authentication: authentication,
-  beforeRequest: [add_headers]
 };

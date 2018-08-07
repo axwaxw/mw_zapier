@@ -23,10 +23,10 @@ const {
 
 var Zap = {
 
-  custom_headers: function(bundle) {
+  custom_headers: function (bundle) {
 
     console.log("auth header function");
-    
+
     var custom_headers = {};
 
     var auth_fields = bundle.auth_fields;
@@ -41,7 +41,7 @@ var Zap = {
     if (datacentre_username || datacentre_password) {
       auth_header = "Basic " + btoa(datacentre_username + ":Datacentre:" + datacentre_password) + ", Basic " + btoa(document_username + ":Document:" + document_password);
     } else {
-      auth_header = "Basic " + btoa(document_username + ":Document:" + document_password);    
+      auth_header = "Basic " + btoa(document_username + ":Document:" + document_password);
     }
 
     console.log(auth_header);
@@ -51,16 +51,16 @@ var Zap = {
     custom_headers['Authorization'] = auth_header;
 
     console.log(custom_headers);
-    
+
     return custom_headers;
-    
+
   },
-  
+
   // =============================================================================      
 
 
-  document_pre_poll: function(bundle) {  
-    
+  document_pre_poll: function (bundle) {
+
     bundle.request.headers = Zap.custom_headers(bundle);
 
     return bundle.request;
@@ -68,14 +68,14 @@ var Zap = {
 
   // =============================================================================      
 
-  document_post_poll: function(bundle) {
-  
+  document_post_poll: function (bundle) {
+
     console.log(bundle.response.status_code);
 
     var content = bundle.response.content;
     var xml = $($.parseXML(content)).find('document');
 
-    var documents = _.map(xml, function(element, index) {
+    var documents = _.map(xml, function (element, index) {
       return {
         id: index,
         document: $(element).text()
@@ -84,10 +84,10 @@ var Zap = {
 
     return documents;
   },
-  
+
   // =============================================================================  
 
-  account_pre_poll: function(bundle) {
+  account_pre_poll: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
@@ -96,7 +96,7 @@ var Zap = {
 
     url += encodeURIComponent(document);
     url += "/export/";
-    url += "table=account&";    
+    url += "table=account&";
     url += "format=xml-verbose";
 
     bundle.request.url = url;
@@ -107,26 +107,26 @@ var Zap = {
   // =============================================================================  
 
 
-  account_post_poll: function(bundle) {
+  account_post_poll: function (bundle) {
 
     var content = bundle.response.content;
-    var xml = $($.parseXML(content)).find('account'); 
-    
-    var accounts = _.map(xml, function(element){
+    var xml = $($.parseXML(content)).find('account');
+
+    var accounts = _.map(xml, function (element) {
       return {
         id: $(element).find('sequencenumber').text(),
         code: $(element).find('code').text(),
         description: $(element).find('description').text()
       };
-    });   
-    
+    });
+
     return accounts;
-  },  
-  
+  },
+
   // =============================================================================  
 
-  tax_pre_poll: function(bundle) {
-   
+  tax_pre_poll: function (bundle) {
+
     bundle.request.headers = Zap.custom_headers(bundle);
 
     var url = bundle.request.url;
@@ -134,7 +134,7 @@ var Zap = {
 
     url += encodeURIComponent(document);
     url += "/export/";
-    url += "table=taxrate&";    
+    url += "table=taxrate&";
     url += "format=xml-verbose";
 
     bundle.request.url = url;
@@ -145,19 +145,19 @@ var Zap = {
   // =============================================================================  
 
 
-  tax_post_poll: function(bundle) {
+  tax_post_poll: function (bundle) {
 
     var content = bundle.response.content;
-    var xml = $($.parseXML(content)).find('taxrate'); 
-    
-    var taxrates = _.map(xml, function(element){
+    var xml = $($.parseXML(content)).find('taxrate');
+
+    var taxrates = _.map(xml, function (element) {
       return {
         id: $(element).find('sequencenumber').text(),
         tax_code: $(element).find('taxcode').text(),
         rate_name: $(element).find('ratename').text() + " (" + Number($(element).find('rate2').text()).toFixed(2) + "%)",
         rate: $(element).find('rate2').text()
       };
-    });   
+    });
     console.log(taxrates);
 
     return taxrates;
@@ -165,7 +165,7 @@ var Zap = {
 
   // =============================================================================  
 
-  new_transaction_pre_poll: function(bundle) {
+  new_transaction_pre_poll: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
@@ -189,13 +189,13 @@ var Zap = {
 
   // =============================================================================  
 
-  new_transaction_post_poll: function(bundle) {
+  new_transaction_post_poll: function (bundle) {
 
     var details = {};
     var content = bundle.response.content;
     var details_xml = $($.parseXML(content)).find('detail');
     var j;
-    
+
     console.log(details_xml);
 
     for (j = 0; j < details_xml.length; j++) {
@@ -305,17 +305,17 @@ var Zap = {
 
   // =============================================================================    
 
-  create_transaction_pre_write: function(bundle) {
+  create_transaction_pre_write: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
     var url = bundle.request.url;
-    var document = bundle.action_fields.document;    
+    var document = bundle.action_fields.document;
 
     url += encodeURIComponent(document);
     url += "/import";
     bundle.request.url = url;
-    
+
     var transaction_xml = "";
     var detail_xml = "";
     var detail_subfile = "";
@@ -342,16 +342,16 @@ var Zap = {
       detail_xml += details.gross && '<detail.Gross>' + details.gross + '</detail.Gross>' || '<detail.gross work-it-out="true" />';
       detail_xml += details.discount && '<detail.Discount>' + details.discount + '</detail.Discount>' || '<detail.discount work-it-out="true" />';
       detail_xml += details.account && '<detail.Account>' + details.account + '</detail.Account>' || '<detail.Account work-it-out="true" />';
-      
+
       detail_xml += details.sale_unit && '<detail.SaleUnit>' + details.sale_unit + '</detail.SaleUnit>' || '<detail.Account work-it-out="true" />';
       detail_xml += details.cost_price && '<detail.CostPrice>' + details.cost_price + '</detail.CostPrice>' || '<detail.Account work-it-out="true" />';
-      detail_xml += details.job_code && '<detail.JobCode>' + details.job_code + '</detail.JobCode>' || '';      
-      
+      detail_xml += details.job_code && '<detail.JobCode>' + details.job_code + '</detail.JobCode>' || '';
+
       detail_xml += '</detail>';
 
       detail_subfile += detail_xml;
     }
-    
+
     console.log(detail_subfile);
 
     transaction_xml = '';
@@ -405,10 +405,10 @@ var Zap = {
 
     transaction_xml += '</transaction>';
     transaction_xml += '</table>';
-    
+
     transaction_xml = transaction_xml.replace("&", "_");
     transaction_xml = transaction_xml.replace("%", "_");
-    
+
     console.log(transaction_xml);
 
     bundle.request.data = transaction_xml;
@@ -416,10 +416,10 @@ var Zap = {
     return bundle.request;
 
   },
-  
+
   // =============================================================================  
 
-  new_name_pre_poll: function(bundle) {    
+  new_name_pre_poll: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
@@ -431,7 +431,7 @@ var Zap = {
 
     url += "table=name&";
     url += "search=" + encodeURI("LastModifiedTime>today()-10") + "&";
-    url += "limit=5&";    
+    url += "limit=5&";
     url += "sort=LastModifiedTime&";
     url += "direction=descending&";
     url += "format=xml-verbose";
@@ -444,7 +444,7 @@ var Zap = {
 
   // =============================================================================  
 
-  new_name_post_poll: function(bundle) {
+  new_name_post_poll: function (bundle) {
 
 
     var content = bundle.response.content;
@@ -549,22 +549,22 @@ var Zap = {
     }
     return names;
   },
-  
+
 
   // =============================================================================  
 
 
-  create_name_pre_write: function(bundle) {
+  create_name_pre_write: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
     var url = bundle.request.url;
-    var document = bundle.action_fields.document;    
+    var document = bundle.action_fields.document;
 
     url += encodeURIComponent(document);
     url += "/import";
     bundle.request.url = url;
-    
+
     var code;
     var name_xml = "";
     var fields = bundle.action_fields;
@@ -572,12 +572,12 @@ var Zap = {
     name_xml = '';
     name_xml += '<?xml version="1.0"?>';
     name_xml += '<table name="Name">';
-    name_xml += '<name>';    
-    
+    name_xml += '<name>';
+
     var name = fields.name;
-    
+
     name_xml += fields.name && '<Name>' + name + '</Name>' || '';
-    
+
     /*    
     // WE CAN NOW IMPORT NAME WITHOUT A NAME CODE
     if (fields.code) {    
@@ -595,7 +595,7 @@ var Zap = {
     
     name_xml += '<Code>' + code + '</Code>';
     */
-    
+
     name_xml += fields.code && '<Code>' + fields.code + '</Code>' || '<Code work-it-out="true" />';
 
     name_xml += fields.tux_number && '<TaxNumber>' + fields.tax_number + '</TaxNumber>' || '';
@@ -697,7 +697,7 @@ var Zap = {
 
     name_xml += '</name>';
     name_xml += '</table>';
-    
+
     name_xml = name_xml.replace("&", "_");
     name_xml = name_xml.replace("%", "_");
 
@@ -706,10 +706,10 @@ var Zap = {
     return bundle.request;
 
   },
-  
-   // =============================================================================  
 
-  find_name_pre_search: function(bundle) {   
+  // =============================================================================  
+
+  find_name_pre_search: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
@@ -719,16 +719,16 @@ var Zap = {
     url += encodeURIComponent(document);
     url += "/export/";
     url += "table=name&";
-    
+
     console.log(bundle.search_fields.search_string);
-    console.log(bundle.search_fields.search_string.search("@"));    
-    
+    console.log(bundle.search_fields.search_string.search("@"));
+
     if (bundle.search_fields.search_string.search("@") > 0) {
       url += "search=" + encodeURIComponent("email==\"" + bundle.search_fields.search_string + "\"") + "&";
     } else {
       url += "search=" + encodeURIComponent("code=\"" + bundle.search_fields.search_string + "\"") + "&";
-    }    
-    
+    }
+
     url += "limit=2&";
     url += "format=xml-verbose";
 
@@ -739,10 +739,10 @@ var Zap = {
 
 
   // =============================================================================  
-  
-  
-  find_name_post_search: function(bundle) {
-  
+
+
+  find_name_post_search: function (bundle) {
+
     if (bundle.response.status_code != 200) {
       return [];
     }
@@ -750,19 +750,19 @@ var Zap = {
     var content = bundle.response.content;
     var xml = $($.parseXML(content)).find('name');
 
-    var names = _.map(xml, function(element) {
-      return {       
+    var names = _.map(xml, function (element) {
+      return {
         id: $(element).find('sequencenumber').text(),
-        name_code: $(element).find('code').text()        
+        name_code: $(element).find('code').text()
       };
     });
     console.log(names);
     return names;
-  },  
+  },
 
   // =============================================================================  
 
-  find_name_pre_read_resource: function(bundle) {
+  find_name_pre_read_resource: function (bundle) {
 
     bundle.request.headers = Zap.custom_headers(bundle);
 
@@ -772,7 +772,7 @@ var Zap = {
     url += encodeURIComponent(document);
     url += "/export/";
     url += "table=name&";
-    url += "search=" + encodeURIComponent("sequencenumber=" + bundle.read_fields.id) + "&";    
+    url += "search=" + encodeURIComponent("sequencenumber=" + bundle.read_fields.id) + "&";
     url += "limit=2&";
     url += "format=xml-verbose";
 
@@ -785,103 +785,103 @@ var Zap = {
   // =============================================================================  
 
 
-  find_name_post_read_resource: function(bundle) {
+  find_name_post_read_resource: function (bundle) {
 
     var content = bundle.response.content;
 
-    var x = $($.parseXML(content)).find('name');   
+    var x = $($.parseXML(content)).find('name');
 
     var name = {
-        id: $(x).find('sequencenumber').text(),
-        last_modified_time: $(x).find('lastmodifiedtime').text(),
-        code: $(x).find('code').text(),
-        name: $(x).find('name').text(),
-        contact: $(x).find('contact').text(),
-        position: $(x).find('position').text(),
-        address1: $(x).find('address1').text(),
-        address2: $(x).find('address2').text(),
-        address3: $(x).find('address3').text(),
-        address4: $(x).find('address4').text(),
-        delivery1: $(x).find('delivery1').text(),
-        delivery2: $(x).find('delivery2').text(),
-        delivery3: $(x).find('delivery3').text(),
-        delivery4: $(x).find('delivery4').text(),
-        phone: $(x).find('phone').text(),
-        fax: $(x).find('fax').text(),
-        category1: $(x).find('category1').text(),
-        category2: $(x).find('category2').text(),
-        category3: $(x).find('category3').text(),
-        category4: $(x).find('category4').text(),
-        customer_type: $(x).find('customertype').text(),
-        d90plus: $(x).find('d90plus').text(),
-        d60plus: $(x).find('d60plus').text(),
-        d30plus: $(x).find('d30plus').text(),
-        dcurrent: $(x).find('dcurrent').text(),
-        ccurrent: $(x).find('ccurrent').text(),
-        debtor_terms: $(x).find('debtorterms').text(),
-        creditor_terms: $(x).find('creditorterms').text(),
-        bank: $(x).find('bank').text(),
-        account_name: $(x).find('accountname').text(),
-        bank_branch: $(x).find('bankbranch').text(),
-        their_ref: $(x).find('theirref').text(),
-        hold: $(x).find('hold').text(),
-        rec_account: $(x).find('recaccount').text(),
-        pay_account: $(x).find('payaccount').text(),
-        kind: $(x).find('kind').text(),
-        credit_limit: $(x).find('creditlimit').text(),
-        discount: $(x).find('discount').text(),
-        comment: $(x).find('comment').text(),
-        supplier_type: $(x).find('suppliertype').text(),
-        colour: $(x).find('colour').text(),
-        sales_person: $(x).find('salesperson').text(),
-        tax_code: $(x).find('taxcode').text(),
-        postcode: $(x).find('postcode').text(),
-        state: $(x).find('state').text(),
-        bank_account_number: $(x).find('bankaccountnumber').text(),
-        currency: $(x).find('currency').text(),
-        payment_method: $(x).find('paymentmethod').text(),
-        dbalance: $(x).find('dbalance').text(),
-        ddi: $(x).find('ddi').text(),
-        email: $(x).find('email').text(),
-        mobile: $(x).find('mobile').text(),
-        after_hours: $(x).find('afterhours').text(),
-        contact2: $(x).find('contact2').text(),
-        position2: $(x).find('position2').text(),
-        ddi2: $(x).find('ddi2').text(),
-        email2: $(x).find('email2').text(),
-        mobile2: $(x).find('mobile2').text(),
-        after_hours2: $(x).find('afterhours2').text(),
-        weburl: $(x).find('weburl').text(),
-        product_pricing: $(x).find('productpricing').text(),
-        date_oflast_sale: $(x).find('dateoflastsale').text(),
-        split_acct1: $(x).find('splitacct1').text(),
-        split_acct2: $(x).find('splitacct2').text(),
-        split_percent: $(x).find('splitpercent').text(),
-        user_num: $(x).find('usernum').text(),
-        user_text: $(x).find('usertext').text(),
-        cust_prompt_payment_terms: $(x).find('custpromptpaymentterms').text(),
-        cust_prompt_payment_discount: $(x).find('custpromptpaymentdiscount').text(),
-        supp_prompt_payment_terms: $(x).find('supppromptpaymentterms').text(),
-        supp_prompt_payment_discount: $(x).find('supppromptpaymentdiscount').text(),
-        last_payment_method: $(x).find('lastpaymentmethod').text(),
-        credit_card_num: $(x).find('creditcardnum').text(),
-        credit_card_expiry: $(x).find('creditcardexpiry').text(),
-        credit_card_name: $(x).find('creditcardname').text(),
-        tax_number: $(x).find('taxnumber').text(),
-        custom1: $(x).find('custom1').text(),
-        custom2: $(x).find('custom2').text(),
-        custom3: $(x).find('custom3').text(),
-        custom4: $(x).find('custom4').text(),
-        delivery_postcode: $(x).find('deliverypostcode').text(),
-        delivery_state: $(x).find('deliverystate').text(),
-        address_country: $(x).find('addresscountry').text(),
-        delivery_country: $(x).find('deliverycountry').text(),
-        receipt_method: $(x).find('receiptmethod').text(),
-        abuid: $(x).find('abuid').text(),
-        flags: $(x).find('flags').text()   
-    };    
-    
-    return name;      
+      id: $(x).find('sequencenumber').text(),
+      last_modified_time: $(x).find('lastmodifiedtime').text(),
+      code: $(x).find('code').text(),
+      name: $(x).find('name').text(),
+      contact: $(x).find('contact').text(),
+      position: $(x).find('position').text(),
+      address1: $(x).find('address1').text(),
+      address2: $(x).find('address2').text(),
+      address3: $(x).find('address3').text(),
+      address4: $(x).find('address4').text(),
+      delivery1: $(x).find('delivery1').text(),
+      delivery2: $(x).find('delivery2').text(),
+      delivery3: $(x).find('delivery3').text(),
+      delivery4: $(x).find('delivery4').text(),
+      phone: $(x).find('phone').text(),
+      fax: $(x).find('fax').text(),
+      category1: $(x).find('category1').text(),
+      category2: $(x).find('category2').text(),
+      category3: $(x).find('category3').text(),
+      category4: $(x).find('category4').text(),
+      customer_type: $(x).find('customertype').text(),
+      d90plus: $(x).find('d90plus').text(),
+      d60plus: $(x).find('d60plus').text(),
+      d30plus: $(x).find('d30plus').text(),
+      dcurrent: $(x).find('dcurrent').text(),
+      ccurrent: $(x).find('ccurrent').text(),
+      debtor_terms: $(x).find('debtorterms').text(),
+      creditor_terms: $(x).find('creditorterms').text(),
+      bank: $(x).find('bank').text(),
+      account_name: $(x).find('accountname').text(),
+      bank_branch: $(x).find('bankbranch').text(),
+      their_ref: $(x).find('theirref').text(),
+      hold: $(x).find('hold').text(),
+      rec_account: $(x).find('recaccount').text(),
+      pay_account: $(x).find('payaccount').text(),
+      kind: $(x).find('kind').text(),
+      credit_limit: $(x).find('creditlimit').text(),
+      discount: $(x).find('discount').text(),
+      comment: $(x).find('comment').text(),
+      supplier_type: $(x).find('suppliertype').text(),
+      colour: $(x).find('colour').text(),
+      sales_person: $(x).find('salesperson').text(),
+      tax_code: $(x).find('taxcode').text(),
+      postcode: $(x).find('postcode').text(),
+      state: $(x).find('state').text(),
+      bank_account_number: $(x).find('bankaccountnumber').text(),
+      currency: $(x).find('currency').text(),
+      payment_method: $(x).find('paymentmethod').text(),
+      dbalance: $(x).find('dbalance').text(),
+      ddi: $(x).find('ddi').text(),
+      email: $(x).find('email').text(),
+      mobile: $(x).find('mobile').text(),
+      after_hours: $(x).find('afterhours').text(),
+      contact2: $(x).find('contact2').text(),
+      position2: $(x).find('position2').text(),
+      ddi2: $(x).find('ddi2').text(),
+      email2: $(x).find('email2').text(),
+      mobile2: $(x).find('mobile2').text(),
+      after_hours2: $(x).find('afterhours2').text(),
+      weburl: $(x).find('weburl').text(),
+      product_pricing: $(x).find('productpricing').text(),
+      date_oflast_sale: $(x).find('dateoflastsale').text(),
+      split_acct1: $(x).find('splitacct1').text(),
+      split_acct2: $(x).find('splitacct2').text(),
+      split_percent: $(x).find('splitpercent').text(),
+      user_num: $(x).find('usernum').text(),
+      user_text: $(x).find('usertext').text(),
+      cust_prompt_payment_terms: $(x).find('custpromptpaymentterms').text(),
+      cust_prompt_payment_discount: $(x).find('custpromptpaymentdiscount').text(),
+      supp_prompt_payment_terms: $(x).find('supppromptpaymentterms').text(),
+      supp_prompt_payment_discount: $(x).find('supppromptpaymentdiscount').text(),
+      last_payment_method: $(x).find('lastpaymentmethod').text(),
+      credit_card_num: $(x).find('creditcardnum').text(),
+      credit_card_expiry: $(x).find('creditcardexpiry').text(),
+      credit_card_name: $(x).find('creditcardname').text(),
+      tax_number: $(x).find('taxnumber').text(),
+      custom1: $(x).find('custom1').text(),
+      custom2: $(x).find('custom2').text(),
+      custom3: $(x).find('custom3').text(),
+      custom4: $(x).find('custom4').text(),
+      delivery_postcode: $(x).find('deliverypostcode').text(),
+      delivery_state: $(x).find('deliverystate').text(),
+      address_country: $(x).find('addresscountry').text(),
+      delivery_country: $(x).find('deliverycountry').text(),
+      receipt_method: $(x).find('receiptmethod').text(),
+      abuid: $(x).find('abuid').text(),
+      flags: $(x).find('flags').text()
+    };
+
+    return name;
   }
 };
 
